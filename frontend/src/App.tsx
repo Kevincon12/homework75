@@ -3,11 +3,37 @@ import './App.css'
 import {Box, Container, IconButton, Stack, TextField, Typography} from "@mui/material";
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import type {MessagePayload} from "./types/types";
+import {decodeMessage, encodeMessage} from "./AxiosApi/AxiosApi.ts";
 
 const App = () => {
     const [decodedMessage, setDecodedMessage] = useState('');
     const [encodedMessage, setEncodedMessage] = useState('');
     const [password, setPassword] = useState('');
+
+    const encodeProcess = async () => {
+        if (!password || !decodedMessage) return;
+        const payload: MessagePayload = { password, message: decodedMessage };
+        try {
+            const res = await encodeMessage(payload);
+            setEncodedMessage(res.data.encoded);
+            setDecodedMessage('');
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const decodeProcess = async () => {
+        if (!password || !encodedMessage) return;
+        const payload: MessagePayload = { password, message: encodedMessage };
+        try {
+            const res = await decodeMessage(payload);
+            setDecodedMessage(res.data.decoded);
+            setEncodedMessage('');
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
   return (
       <Container maxWidth="sm" sx={{ mt: 5 }}>
@@ -34,11 +60,11 @@ const App = () => {
               />
 
               <Box display="flex" justifyContent="center" gap={2}>
-                  <IconButton color="primary" aria-label="decode" size="large">
+                  <IconButton color="primary" aria-label="decode" size="large" onClick={decodeProcess}>
                       <ArrowUpwardIcon fontSize="inherit" />
                   </IconButton>
 
-                  <IconButton color="primary" aria-label="encode" size="large">
+                  <IconButton color="primary" aria-label="encode" size="large" onClick={encodeProcess}>
                       <ArrowDownwardIcon fontSize="inherit" />
                   </IconButton>
               </Box>
